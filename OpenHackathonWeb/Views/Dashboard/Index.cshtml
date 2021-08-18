@@ -1,0 +1,119 @@
+﻿@using OpenHackathonWeb.Extensions;
+@using OpenHackathonWeb.Helpers;
+@model IEnumerable<OpenHackathonWeb.Models.HackathonViewModel>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div id="modal-placeholder"></div>
+
+<div class="dashboard-block">
+    <div class="container">
+        <div class="row">
+            <div class="col mb-4">
+                <div class="content-box">
+                    <span> Balance</span>
+                    <label id="balance">0.00 </label> CRS
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @if (User.GetRole() == (int)UserRoles.Owner)
+            {
+                //TODO: show contract balance
+                @*<div class="col-lg-4 mb-4">
+                    <div class="form-group">
+                        <button class="btn btn-primary form-control" title="Deposit Fund" onclick="location.href='@Url.Action("Deposit", "Hackathon")'">Deposit Fund</button>
+                    </div>
+                </div>*@
+                <div class="col-lg-4 mb-4">
+                    <div class="form-group">
+                        <button class="btn btn-primary form-control" title="Create Hackathon" onclick="location.href='@Url.Action("Create", "Hackathon")'">Create Hackathon</button>
+                    </div>
+                </div>
+            }
+
+            <div class="table-responsive">
+                <table class="table table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Id)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Title)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Duration)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ManagerName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.PrizeAmount)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Id)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Duration)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ManagerName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PrizeAmount)
+                                </td>
+
+                                @if (User.GetRole() == (int)UserRoles.HackathonManager)
+                                {
+                                    <td>
+                                        <a asp-action="SetPrize" asp-controller="Hackathon" asp-route-hackathonId="@item.Id" class="btn btn-outline-primary btn-sm">Set Prize</a>
+                                        <a asp-action="AnnounceWinner" asp-controller="Hackathon" asp-route-hackathonId="@item.Id" class="btn btn-outline-primary btn-sm">Announce Winner</a>
+                                    </td>
+                                }
+                                else if (User.GetRole() == (int)UserRoles.RegisteredMember && !item.IsUserRegistered)
+                                {
+                                    <td class="text-right">
+                                        @*<a asp-action="Register" asp-controller="Hackathon" asp-route-hackathonId="@item.Id" class="btn btn-outline-primary btn-sm">Register</a>*@
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="ajax-modal" data-target="#submit-application" data-url="@Url.Action("Register", "Hackathon", new {hackathonId = item.Id })">
+                                            Register
+                                        </button>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script>
+
+        $(document).ready(function () {            
+            getBalance();
+
+        });
+        function getBalance() {
+            $.get('Dashboard/GetAddressBalance', function (data) {
+                $('#balance').html(data);
+            })
+                .fail(function (data) {
+                    console.log(data);
+                });
+        }
+
+    </script>
+}
